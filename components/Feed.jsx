@@ -34,7 +34,35 @@ const Feed = () => {
     console.log(data);
   };
 
-  const handleSearchChange = (e) => {};
+  const filterPrompts = (searchtext) => {
+    const regex = new RegExp(searchtext, "i"); // 'i' flag for case-insensitive search
+    return allPosts.filter(
+      (item) =>
+        regex.test(item.creator.username) ||
+        regex.test(item.tag) ||
+        regex.test(item.prompt)
+    );
+  };
+
+  const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+
+    // debounce method
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResult = filterPrompts(e.target.value);
+        setSearchedResults(searchResult);
+      }, 500)
+    );
+  };
+
+  const handleTagClick = (tagName) => {
+    setSearchText(tagName);
+
+    const searchResult = filterPrompts(tagName);
+    setSearchedResults(searchResult);
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -54,9 +82,12 @@ const Feed = () => {
 
       {/* All Prompts */}
       {searchText ? (
-        <PromptCardList data={searchedResults} handleTagClick={() => {}} />
+        <PromptCardList
+          data={searchedResults}
+          handleTagClick={handleTagClick}
+        />
       ) : (
-        <PromptCardList data={allPosts} handleTagClick={() => {}} />
+        <PromptCardList data={allPosts} handleTagClick={handleTagClick} />
       )}
     </section>
   );
